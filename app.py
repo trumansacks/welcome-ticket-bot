@@ -27,12 +27,12 @@ async def on_member_join(member):
     logger.warning(f'{member} has joined the server')
     guild = member.guild
 
-    category = discord.utils.get(member.guild.categories, name='TICKETS') #checks to see if there is a tickets category
+    category = discord.utils.get(member.guild.categories, name='WELCOME-TICKETS') #checks to see if there is a tickets category
 
     if category == None:
         logger.warning('no tickets category found')
         try:
-            category = await guild.create_category('TICKETS', position=0) #creates ticket category if there is no existing one detected
+            category = await guild.create_category('WELCOME-TICKETS', position=0) #creates ticket category if there is no existing one detected
             logger.info('tickets category created')
         except Exception as e:
             logger.error(e)
