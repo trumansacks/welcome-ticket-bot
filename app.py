@@ -8,6 +8,7 @@ import os
 Intents = discord.Intents.default()
 Intents.members=True
 Intents.guilds=True
+Intents.messages=True
 client = discord.Client(intents=Intents)
 
 load_dotenv() #loads .env variables
@@ -49,12 +50,32 @@ async def on_member_join(member):
 
     try:
         channel = await guild.create_text_channel(f'welcome-{member}', overwrites=overwrites, category=category, position=0) #creates the welcome channel
-        embedVar = discord.Embed(title=f"Welcome {member}!", description=f'This channel has been created to welcome {member.name} to {guild}', color=0x33CAFF) #embed formatter
+        embedVar = discord.Embed(title=f"Welcome {member}!", description=f'This channel has been created to welcome <@{member.id}> to {guild}. Say hi {member.name}!', color=0x33CAFF) #embed formatter
         await channel.send(embed=embedVar)
         logger.info(f'new channel created with admins & {member}')
     except Exception as e:
         logger.error(e)
             
     
+
+@client.event
+async def on_message(message):
+    author = message.author
+    author_role = discord.utils.get(message.author.roles, name=TICKET_ROLE)
+    
+    welcome_ticket_category = discord.utils.get(message.guild.categories, name='WELCOME-TICKETS')
+    message_channel_category = message.channel.category
+
+
+    if author_role and message_channel_category == welcome_ticket_category:
+        if message.content == '!close':
+                try:
+                    await message.channel.delete()
+                    logger.info(f'channel deleted by {message.author}')
+                except Exception as e:
+                    logger.error(e)
+    else:
+        logger.error(f'unable to delete channel')
+
 
 client.run(BOT_TOKEN)
