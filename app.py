@@ -20,6 +20,7 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 @client.event
 async def on_ready():
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'[{len(client.guilds)} servers]'))
     logger.info(f'beep boop! [{len(client.guilds)} servers]')
     servers = client.guilds
     for server in servers:
