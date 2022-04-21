@@ -20,25 +20,30 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 @client.event
 async def on_ready():
-    logger.info('beep boop!')
+    logger.info(f'beep boop! [{len(client.guilds)} servers]')
+    servers = client.guilds
+    for server in servers:
+        logger.warning(f'[{server.name}] [{server.owner}] [{server.member_count} members]')
+    logger.warning('-----------------------------------')
 
 
 @client.event
 async def on_member_join(member):
-    logger.warning(f'{member} has joined the server')
+    server_name = member.guild.name
+    logger.warning(f'[{server_name}] {member} has joined the server')
     guild = member.guild
 
     category = discord.utils.get(member.guild.categories, name='WELCOME-TICKETS') #checks to see if there is a tickets category
 
     if category == None:
-        logger.warning('no tickets category found')
+        logger.warning(f'[{server_name}] no tickets category found')
         try:
             category = await guild.create_category('WELCOME-TICKETS', position=0) #creates ticket category if there is no existing one detected
-            logger.info('tickets category created')
+            logger.info(f'[{server_name}] tickets category created')
         except Exception as e:
             logger.error(e)
     else:
-        logger.info('ticket category detected')
+        logger.info(f'[{server_name}] ticket category detected')
    
 
     overwrites = {
@@ -52,7 +57,7 @@ async def on_member_join(member):
         channel = await guild.create_text_channel(f'welcome-{member}', overwrites=overwrites, category=category, position=0) #creates the welcome channel
         embedVar = discord.Embed(title=f"Welcome {member}!", description=f'This channel has been created to welcome <@{member.id}> to {guild}. Say hi {member.name}!', color=0x33CAFF) #embed formatter
         await channel.send(embed=embedVar)
-        logger.info(f'new channel created with admins & {member}')
+        logger.info(f'[{server_name}] new channel created with admins & {member}')
     except Exception as e:
         logger.error(e)
             
@@ -60,6 +65,7 @@ async def on_member_join(member):
 
 @client.event
 async def on_message(message):
+    server_name = message.guild.name
     author = message.author
     author_role = discord.utils.get(message.author.roles, name=TICKET_ROLE)
     
@@ -71,11 +77,8 @@ async def on_message(message):
         if message.content == '!close':
                 try:
                     await message.channel.delete()
-                    logger.info(f'channel deleted by {message.author}')
+                    logger.info(f'[{server_name}] channel deleted by {message.author}')
                 except Exception as e:
                     logger.error(e)
-    else:
-        logger.error(f'unable to delete channel')
-
 
 client.run(BOT_TOKEN)
